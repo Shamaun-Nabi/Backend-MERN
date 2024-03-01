@@ -33,7 +33,7 @@ export const registerUser = async (req, res) => {
     await newUser.save();
 
     res.send({
-      message: "True",
+      message: "Registration Complete",
       data: newUser,
     });
   } catch (error) {
@@ -45,25 +45,33 @@ export const registerUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
+  console.log(email, password);
 
   const existEmail = await User.findOne({ email });
-  if (existEmail) {
-    if (password === existEmail.password) {
-      const token = JWT.sign({ _id: existEmail._id }, "secret", {
-        expiresIn: "10d",
-      });
-      res.send({
-        message: "Login Successful",
-        data: existEmail,
-        token: token,
-      });
+
+  try {
+    if (existEmail) {
+      if (password === existEmail.password) {
+        const token = JWT.sign({ _id: existEmail._id }, "secret", {
+          expiresIn: "10d",
+        });
+        res.send({
+          message: "Login Successful",
+          userData: existEmail,
+          token: token,
+          status: true,
+        });
+      } else {
+        res.send({
+          message: "Invalid Password or Email",
+        });
+      }
     } else {
       res.send({
         message: "Invalid Password or Email",
+        status: false,
       });
     }
-  }
-  try {
   } catch (error) {
     res.send({
       message: error.message,
